@@ -1,4 +1,4 @@
-// ==== ORIGINAL SET A FUNCTIONALITY ====
+// Complete merged script with Set B logic and [ZT] naming
 const players = [
     { role: '職位 1', steam16: '1234567890123456', name: '[ZT] MGK', shift: 'morning' },
     { role: '職位 2', steam16: '1234567890123456', name: 'Player 2', shift: 'afternoon' },
@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     showSection("shiftData");
     loadHistory();
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
 });
 
 function processText(text) {
@@ -34,7 +35,6 @@ function processText(text) {
 
     lines.forEach((line) => {
         line = line.trim();
-
         if (line.startsWith("時間:")) currentTime = line.replace("時間:", "").trim();
         if (line.startsWith("發出:")) currentSender = line.replace("發出:", "").trim();
 
@@ -70,7 +70,6 @@ function isWithinShift(hour, shift) {
         night: [21, 24],
         midnight: [0, 6],
     };
-
     const [start, end] = shiftHours[shift];
     return hour >= start && hour < end;
 }
@@ -89,38 +88,14 @@ function updateTable() {
 
     Object.keys(shifts).forEach((shift) => {
         const shiftPlayers = players.filter((player) => player.shift === shift);
-
         if (shiftPlayers.length > 0) {
-            let tableHTML = `
-                <div class="shift-section">
-                    <h3>${shifts[shift]}</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>職位</th>
-                                <th>Steam16</th>
-                                <th>姓名</th>
-                                <th>上班單數</th>
-                                <th>非上班單數</th>
-                                <th>總數量</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
+            let tableHTML = `<div class="shift-section"><h3>${shifts[shift]}</h3><table><thead><tr>
+                <th>職位</th><th>Steam16</th><th>姓名</th><th>上班單數</th><th>非上班單數</th><th>總數量</th>
+            </tr></thead><tbody>`;
             shiftPlayers.forEach((player) => {
-                tableHTML += `
-                    <tr>
-                        <td>${player.role}</td>
-                        <td>${player.steam16}</td>
-                        <td>${player.name}</td>
-                        <td>${player.workingTimeTotal}</td>
-                        <td>${player.nonWorkingTimeTotal}</td>
-                        <td>${player.total}</td>
-                    </tr>
-                `;
+                tableHTML += `<tr><td>${player.role}</td><td>${player.steam16}</td><td>${player.name}</td>
+                <td>${player.workingTimeTotal}</td><td>${player.nonWorkingTimeTotal}</td><td>${player.total}</td></tr>`;
             });
-
             tableHTML += `</tbody></table></div>`;
             shiftSections.innerHTML += tableHTML;
         }
@@ -133,32 +108,14 @@ function updateMaterialsTable() {
         { name: "鉛礦", price: 30000, amount: 0 },
         { name: "高級金屬", price: 39000, amount: 0 },
     ];
-
-    let tableHTML = `
-        <h3>材料收購</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>材料</th>
-                    <th>單價</th>
-                    <th>數量</th>
-                    <th>總計</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
-
+    let tableHTML = `<h3>材料收購</h3><table><thead><tr>
+        <th>材料</th><th>單價</th><th>數量</th><th>總計</th>
+    </tr></thead><tbody>`;
     materials.forEach((material) => {
-        tableHTML += `
-            <tr>
-                <td>${material.name}</td>
-                <td>${material.price}</td>
-                <td><input type="number" value="${material.amount}" min="0" onchange="calculateTotal(this, ${material.price}, '${material.name}')"></td>
-                <td id="total-${material.name}">${material.amount * material.price}</td>
-            </tr>
-        `;
+        tableHTML += `<tr><td>${material.name}</td><td>${material.price}</td>
+            <td><input type="number" value="0" min="0" onchange="calculateTotal(this, ${material.price}, '${material.name}')"></td>
+            <td id="total-${material.name}">0</td></tr>`;
     });
-
     tableHTML += `</tbody></table>`;
     document.getElementById("materialsSection").innerHTML = tableHTML;
 }
@@ -172,118 +129,95 @@ function calculateTotal(input, price, materialName) {
 function showSection(section) {
     const sections = ["shiftData", "calculator", "announcements", "uploadSection"];
     sections.forEach((s) => {
-        const element = document.getElementById(s);
-        if (element) element.classList.add("hidden");
+        const el = document.getElementById(s);
+        if (el) el.classList.add("hidden");
     });
-
-    const selectedElement = document.getElementById(section);
-    if (selectedElement) selectedElement.classList.remove("hidden");
+    const target = document.getElementById(section);
+    if (target) target.classList.remove("hidden");
 }
 
-// ==== SET B: FILE UPLOAD AND HISTORY ====
-document.addEventListener("DOMContentLoaded", function () {
-    const form = document.querySelector("form");
-    const results = document.getElementById("results");
-    const fileInput = document.getElementById("logFile");
-    const fileName = document.getElementById("fileName");
+// Set B: Upload, history, logout
+const form = document.querySelector("form");
+const results = document.getElementById("results");
+const fileInput = document.getElementById("logFile");
+const fileName = document.getElementById("fileName");
+const modal = document.getElementById("historyModal");
+const historyBtn = document.getElementById("historyBtn");
+const closeBtn = document.querySelector(".close");
+const logoutBtn = document.getElementById("logoutBtn");
 
-    if (form) {
-        form.addEventListener("submit", function (e) {
-            e.preventDefault();
-            const formData = new FormData(this);
+if (form) {
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        fetch("process.php", { method: "POST", body: formData })
+            .then((res) => res.json())
+            .then((data) => displayResults(data))
+            .catch(() => results.innerHTML = '<p class="error">處理過程中發生錯誤</p>');
+    });
+}
 
-            fetch("process.php", {
-                method: "POST",
-                body: formData,
-            })
-                .then((response) => response.json())
-                .then((data) => displayResults(data))
-                .catch(() => {
-                    results.innerHTML = '<p class="error">處理過程中發生錯誤</p>';
-                });
-        });
-    }
-
-    if (fileInput) {
-        fileInput.addEventListener("change", function () {
-            if (this.files && this.files[0]) {
-                fileName.textContent = "已選擇: " + this.files[0].name;
-                fileName.classList.add("show");
-            } else {
-                fileName.textContent = "";
-                fileName.classList.remove("show");
-            }
-        });
-    }
-
-    const modal = document.getElementById("historyModal");
-    const historyBtn = document.getElementById("historyBtn");
-    const closeBtn = document.querySelector(".close");
-
-    if (historyBtn) {
-        historyBtn.addEventListener("click", function () {
-            modal.style.display = "block";
-            loadHistory();
-        });
-    }
-
-    if (closeBtn) {
-        closeBtn.addEventListener("click", function () {
-            modal.style.display = "none";
-        });
-    }
-
-    window.addEventListener("click", function (event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
+if (fileInput) {
+    fileInput.addEventListener("change", function () {
+        if (this.files && this.files[0]) {
+            fileName.textContent = "已選擇: " + this.files[0].name;
+            fileName.classList.add("show");
+        } else {
+            fileName.textContent = "";
+            fileName.classList.remove("show");
         }
     });
-});
+}
+
+if (historyBtn) {
+    historyBtn.addEventListener("click", () => {
+        modal.style.display = "block";
+        loadHistory();
+    });
+}
+if (closeBtn) closeBtn.onclick = () => modal.style.display = "none";
+window.onclick = (e) => { if (e.target == modal) modal.style.display = "none"; };
 
 function loadHistory() {
     fetch("get_history.php")
-        .then((response) => response.json())
-        .then((data) => {
-            const historyList = document.getElementById("historyList");
-            historyList.innerHTML = "";
-
-            data.forEach((record) => {
-                const item = document.createElement("div");
-                item.className = "history-item";
-                item.innerHTML = `
-                    <span class="filename">${record.filename}</span>
-                    <span class="time">${record.uploadTime}</span>
-                `;
-                item.addEventListener("click", () => {
+        .then(res => res.json())
+        .then(data => {
+            const list = document.getElementById("historyList");
+            list.innerHTML = "";
+            data.forEach(item => {
+                const el = document.createElement("div");
+                el.className = "history-item";
+                el.innerHTML = `<span class="filename">${item.filename}</span><span class="time">${item.uploadTime}</span>`;
+                el.onclick = () => {
                     fetch("process.php", {
                         method: "POST",
-                        body: JSON.stringify({ historyFile: record.path }),
-                        headers: { "Content-Type": "application/json" },
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ historyFile: item.path })
                     })
-                        .then((response) => response.json())
-                        .then((data) => {
+                        .then(res => res.json())
+                        .then(data => {
                             displayResults(data);
-                            document.getElementById("historyModal").style.display = "none";
+                            modal.style.display = "none";
                         });
-                });
-                historyList.appendChild(item);
+                };
+                list.appendChild(el);
             });
         });
 }
 
 function displayResults(data) {
-    let html = "<h2>分析結果</h2>";
-    html += "<table><tr><th>佐藤人員</th><th>接單數</th><th>完成數</th><th>完成率</th></tr>";
-    data.forEach((person) => {
-        html += `
-            <tr>
-                <td>${person.name}<br><span class="steam-id">${person.steamId}</span></td>
-                <td>${person.accepted}</td>
-                <td>${person.completed}</td>
-                <td>${person.completion_rate}</td>
-            </tr>
-        `;
+    let html = "<h2>分析結果</h2><table><tr><th>佐藤人員</th><th>接單數</th><th>完成數</th><th>完成率</th></tr>";
+    data.forEach(p => {
+        html += `<tr><td>${p.name}<br><span class="steam-id">${p.steamId}</span></td>
+        <td>${p.accepted}</td><td>${p.completed}</td><td>${p.completion_rate}</td></tr>`;
     });
     html += "</table>";
-    document.getElementById("results").innerHTML = html;
+    results.innerHTML = html;
+}
+
+if (logoutBtn) {
+    logoutBtn.onclick = () => {
+        sessionStorage.removeItem("isLoggedIn");
+        location.reload();
+    };
 }
