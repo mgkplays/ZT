@@ -1,8 +1,8 @@
 // ==== ORIGINAL SET A FUNCTIONALITY ====
 const players = [
-    { role: '職位 1', steam16: '1234567890123456', name: '[DX] MGK', shift: 'morning' },
+    { role: '職位 1', steam16: '1234567890123456', name: '[ZT] MGK', shift: 'morning' },
     { role: '職位 2', steam16: '1234567890123456', name: 'Player 2', shift: 'afternoon' },
-    { role: '職位 3', steam16: '1234567890123456', name: '[DX] 123', shift: 'evening' },
+    { role: '職位 3', steam16: '1234567890123456', name: '[ZT] 123', shift: 'evening' },
     { role: '職位 4', steam16: '1234567890123456', name: 'Player 4', shift: 'evening' },
     { role: '職位 5', steam16: '1234567890123456', name: 'Player 5', shift: 'night' },
     { role: '職位 7', steam16: '1234567890123456', name: 'Player 7', shift: 'midnight' },
