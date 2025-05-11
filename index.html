@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宮田自動車整備所</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div id="sidebar">
+        <h3>選擇功能</h3>
+        <ul>
+            <li><a href="#" onclick="showSection('shiftData')">單數資料</a></li>
+            <li><a href="#" onclick="showSection('calculator')">計算機</a></li>
+            <li><a href="#" onclick="showSection('announcements')">公告複貼</a></li>
+            <li><a href="#" onclick="showSection('uploadSection')">接單分析</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent">
+        <h2>宮田自動車整備所</h2>
+        <div id="shiftSections"></div>
+
+        <!-- Additional Sections -->
+        <div id="calculator" class="hidden">
+            <h3>計算機</h3>
+            <p>這裡是計算機功能。</p>
+        </div>
+
+        <div id="announcements" class="hidden">
+            <h3>公告複貼</h3>
+            <p>這裡是公告複貼功能。</p>
+        </div>
+
+        <!-- Set B Upload & History Section -->
+        <div id="uploadSection" class="hidden">
+            <h3>📊 接單分析</h3>
+            <form action="process.php" method="post" enctype="multipart/form-data">
+                <div class="button-group">
+                    <div class="file-input">
+                        <input type="file" name="logFile" id="logFile" accept=".txt" required>
+                        <label for="logFile">📁 選擇記錄檔</label>
+                    </div>
+                    <button type="submit">開始分析</button>
+                    <button type="button" id="historyBtn" class="history-btn">📋 歷史記錄</button>
+                </div>
+                <div class="file-name" id="fileName"></div>
+            </form>
+
+            <div id="results" class="results-section">
+                <!-- 結果將在這裡顯示 -->
+            </div>
+        </div>
+
+        <!-- 歷史記錄彈出視窗 -->
+        <div id="historyModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>歷史記錄</h3>
+                    <span class="close">&times;</span>
+                </div>
+                <div id="historyList" class="history-list">
+                    <!-- 歷史記錄將在這裡顯示 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Materials Section (from Set A) -->
+        <div id="materialsSection"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2025 宮田自動車整備所</p>
+        <div class="credits">
+            <span>Designed and Developed by [DX] MGK1</span>
+            <span>Credits to [DR] 老吳</span>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
